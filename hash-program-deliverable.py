@@ -19,6 +19,7 @@ def generate_hashes():
     print("Invalid directory, please try again.")
     return
 
+  os.mkdir("dir_hash_tables")
   # Using path as hash key
   hash_table = {}
   for root, _, files in os.walk(dir_path):
@@ -28,15 +29,16 @@ def generate_hashes():
       if f_hash:
         hash_table[full_path] = f_hash
   data = {"directory": os.path.abspath(dir_path), "hashes": hash_table}
-  with open("hashes.json", "w") as f:
+  
+  with open(os.path.join("dir_hash_tables", f"hash_{os.path.basename(dir_path)}.json"), "w") as f:
     json.dump(data, f, indent=4)
   print(f"Table generated with {len(hash_table)} files.")
 
 def verify_hashes():
-  if not os.path.exists("hashes.json"):
+  if not os.path.exists("dir_hash_tables"):
     print("No hash table found. Please generate one first.")
     return
-  with open("hashes.json", "r") as f:
+  with open(os.path.join("dir_hash_tables", f"hash_{os.path.basename(os.path.abspath(input('Enter the specific directory name (i.e. "folder_for_uncc_notes") to verify: ')))}.json"), "r") as f:
     stored_data = json.load(f)
 
   stored_hashes = stored_data["hashes"] # {path: hash}
@@ -62,7 +64,7 @@ def verify_hashes():
       # File exists at the same path
       processed_current_paths.add(old_path)
       old_hash = current_files[old_path]
-      if old_hash == old_hash:
+      if old_hash == stored_hashes[old_path]:
         print(f"[UNCHANGED] {old_path}")
       else:
         print(f"[MODIFIED] {old_path}")
@@ -76,8 +78,7 @@ def verify_hashes():
           found_at_new_path = c_path
           break
       if found_at_new_path:
-        print(f"[RENAMED] {old_path} -> {found_at_new_path}")
-        print(f"{found_at_new_path}")
+        print(f"[RENAMED] {old_path} - FILE NAME CHANGED: {os.path.basename(old_path)} RENAMED TO {os.path.basename(found_at_new_path)}")
         del updates_hashes[old_path]
         updates_hashes[found_at_new_path] = old_hash
         processed_current_paths.add(found_at_new_path)
@@ -92,21 +93,18 @@ def verify_hashes():
       updates_hashes[c_path] = c_hash
   
   stored_data["hashes"] = updates_hashes
-  with open("hashes.json", "w") as f:
+  with open(os.path.join("dir_hash_tables", f"{os.path.basename(target_dir)}.json"), "w") as f:
     json.dump(stored_data, f, indent=4)
     print("\nHash table updated.")
 
 def main():
-  for _ in range(100):
-    print("1. Generate Hash Table\n2. Verify Hashes\n3. Exit")
-    choice = input("Select: ")
-    if choice == '1': generate_hashes()
-    elif choice == '2': verify_hashes()
-    elif choice == '3': break
-    else:
-      print("Invalid choice, please try again.")
-  
-  return
+  print("1. Generate Hash Table\n2. Verify Hashes\n3. Exit")
+  choice = input("Select: ")
+  if choice == '1': generate_hashes()
+  elif choice == '2': verify_hashes()
+  elif choice == '3': return
+  else:
+    print("Invalid choice, please try again.")
 
 if __name__ == "__main__":
   main()
