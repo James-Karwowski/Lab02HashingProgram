@@ -12,3 +12,18 @@ def calc_sha256(file_path):
     return sha256_hash.hexdigest()
   except Exception:
     return None
+
+def generate_hashes():
+  """+"""
+
+def verify_hashes():
+  """+"""
+
+def main():
+  print("1. Generate Hash Table\n2. Verify Hashes")
+  choice = input("Select: ")
+  if choice == '1': generate_hashes()
+  elif choice == '2': verify_hashes()
+
+if __name__ == "__main__":
+  main()
